@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Promo Rate Manager</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;font-size:12px;background:#f0f0f0;height:100vh;display:flex;flex-direction:column;overflow:hidden;color:#1a1a1a}
@@ -132,6 +132,7 @@ td.bl{border-left:2px solid #ddd}
     <div class="tab-spacer"></div>
     <span class="change-badge" id="changeBadge"></span>
     <button class="upload-btn" onclick="openUpload()">⬆ Upload New List</button>
+    <button class="export-btn" id="mattExportBtn" onclick="doMattExport()" style="background:#7c3aed">⬇ Matt A's Export</button>
     <button class="export-btn" id="exportBtn" onclick="doExport()">⬇ Export to Excel</button>
   </div>
 
@@ -418,6 +419,108 @@ function buildRestricted(rec){
   });
   if(codes.size===0)return'';
   return':'+[...codes].join(':')+':';
+}
+function doMattExport(){
+  const btn=document.getElementById('mattExportBtn');
+  btn.disabled=true;btn.textContent='⏳ Building…';
+  setTimeout(()=>{
+    try{
+      // Row 1: group headers (merged across sub-columns)
+      // Row 2: sub-column labels
+      // Row 3+: data
+      // Columns: Promo, Desc, T1-A, T1-B, T1-G, T2-A, T2-B, T2-G, T3-A, T3-B, T3-G, NT-A, NT-B
+      const wb=XLSX.utils.book_new();
+      const ws={};
+
+      // Helper to write a cell
+      const C=(r,c,v,s)=>{
+        const addr=XLSX.utils.encode_cell({r,c});
+        ws[addr]={v,t:typeof v==='number'?'n':'s',s:s||{}};
+      };
+
+      // Styles
+      const sPromo={font:{bold:true,sz:10},fill:{fgColor:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:{bottom:{style:'thin',color:{rgb:'CCCCCC'}}}};
+      const sDesc={font:{sz:10},fill:{fgColor:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:{bottom:{style:'thin',color:{rgb:'CCCCCC'}}}};
+      const sHdrBlank={font:{bold:true,sz:9,color:{rgb:'CCCCCC'}},fill:{fgColor:{rgb:'2C2C2E'}},alignment:{horizontal:'left',vertical:'center'}};
+      const sHdrT1={font:{bold:true,sz:9,color:{rgb:'90CAF9'}},fill:{fgColor:{rgb:'1A3550'}},alignment:{horizontal:'center',vertical:'center'}};
+      const sHdrT2={font:{bold:true,sz:9,color:{rgb:'A5D6A7'}},fill:{fgColor:{rgb:'1A3A1A'}},alignment:{horizontal:'center',vertical:'center'}};
+      const sHdrT3={font:{bold:true,sz:9,color:{rgb:'FFCC80'}},fill:{fgColor:{rgb:'3A2012'}},alignment:{horizontal:'center',vertical:'center'}};
+      const sHdrNT={font:{bold:true,sz:9,color:{rgb:'CE93D8'}},fill:{fgColor:{rgb:'2A1F3A'}},alignment:{horizontal:'center',vertical:'center'}};
+      const sSubA={font:{bold:true,sz:9,color:{rgb:'90CAF9'}},fill:{fgColor:{rgb:'1D3D5A'}},alignment:{horizontal:'center',vertical:'center'}};
+      const sSubB={font:{bold:true,sz:9,color:{rgb:'A5D6A7'}},fill:{fgColor:{rgb:'1D3D5A'}},alignment:{horizontal:'center',vertical:'center'}};
+      const sSubG={font:{bold:true,sz:9,color:{rgb:'FFCC80'}},fill:{fgColor:{rgb:'1D3D5A'}},alignment:{horizontal:'center',vertical:'center'}};
+      const sSubA2={...sSubA,fill:{fgColor:{rgb:'1A3A1A'}}};
+      const sSubB2={...sSubB,fill:{fgColor:{rgb:'1A3A1A'}}};
+      const sSubG2={...sSubG,fill:{fgColor:{rgb:'1A3A1A'}}};
+      const sSubA3={...sSubA,fill:{fgColor:{rgb:'3A2012'}}};
+      const sSubB3={...sSubB,fill:{fgColor:{rgb:'3A2012'}}};
+      const sSubG3={...sSubG,fill:{fgColor:{rgb:'3A2012'}}};
+      const sSubNTA={...sSubA,fill:{fgColor:{rgb:'2A1F3A'}}};
+      const sSubNTB={...sSubB,fill:{fgColor:{rgb:'2A1F3A'}}};
+
+      const cellA={font:{sz:10,color:{rgb:'1565C0'}},fill:{fgColor:{rgb:'E3F2FD'}},alignment:{horizontal:'center',vertical:'center'}};
+      const cellB={font:{sz:10,color:{rgb:'2E7D32'}},fill:{fgColor:{rgb:'E8F5E9'}},alignment:{horizontal:'center',vertical:'center'}};
+      const cellG={font:{sz:10,color:{rgb:'E65100'}},fill:{fgColor:{rgb:'FFF8E1'}},alignment:{horizontal:'center',vertical:'center'}};
+      const cellX={font:{sz:10,color:{rgb:'C62828'}},fill:{fgColor:{rgb:'FCE8E6'}},alignment:{horizontal:'center',vertical:'center'}};
+      const cellNTA={font:{sz:10,color:{rgb:'6A1B9A'}},fill:{fgColor:{rgb:'EDE7F6'}},alignment:{horizontal:'center',vertical:'center'}};
+      const cellNTB={font:{sz:10,color:{rgb:'283593'}},fill:{fgColor:{rgb:'E8EAF6'}},alignment:{horizontal:'center',vertical:'center'}};
+
+      // Row 0: group header row
+      C(0,0,'Promo',sHdrBlank);
+      C(0,1,'Description',sHdrBlank);
+      C(0,2,'TIER 1',sHdrT1); C(0,3,'',sHdrT1); C(0,4,'',sHdrT1);
+      C(0,5,'TIER 2',sHdrT2); C(0,6,'',sHdrT2); C(0,7,'',sHdrT2);
+      C(0,8,'TIER 3',sHdrT3); C(0,9,'',sHdrT3); C(0,10,'',sHdrT3);
+      C(0,11,'Alum / EV',sHdrNT); C(0,12,'',sHdrNT);
+
+      // Row 1: sub-column labels
+      C(1,0,'',sHdrBlank); C(1,1,'',sHdrBlank);
+      C(1,2,'A',sSubA); C(1,3,'B',sSubB); C(1,4,'G',sSubG);
+      C(1,5,'A',sSubA2); C(1,6,'B',sSubB2); C(1,7,'G',sSubG2);
+      C(1,8,'A',sSubA3); C(1,9,'B',sSubB3); C(1,10,'G',sSubG3);
+      C(1,11,'A',sSubNTA); C(1,12,'B',sSubNTB);
+
+      // Data rows
+      DATA.forEach((rec,i)=>{
+        const r=i+2;
+        const av=getAv(rec);
+        const desc=rec.exp[1]||'';
+        C(r,0,rec.p,sPromo);
+        C(r,1,desc,sDesc);
+        // t1A,t1B,t1G, t2A,t2B,t2G, t3A,t3B,t3G, ntA,ntB
+        const vals=[
+          [bit(av,'t1A'),'A',cellA],[bit(av,'t1B'),'B',cellB],[bit(av,'t1G'),'G',cellG],
+          [bit(av,'t2A'),'A',cellA],[bit(av,'t2B'),'B',cellB],[bit(av,'t2G'),'G',cellG],
+          [bit(av,'t3A'),'A',cellA],[bit(av,'t3B'),'B',cellB],[bit(av,'t3G'),'G',cellG],
+          [bit(av,'ntA'),'A',cellNTA],[bit(av,'ntB'),'B',cellNTB],
+        ];
+        vals.forEach(([on,lbl,sOn],ci)=>{
+          C(r,ci+2,on?lbl:'—',on?sOn:cellX);
+        });
+      });
+
+      // Set worksheet range
+      ws['!ref']=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:DATA.length+1,c:12}});
+
+      // Merge group header cells
+      ws['!merges']=[
+        {s:{r:0,c:0},e:{r:1,c:0}}, // Promo
+        {s:{r:0,c:1},e:{r:1,c:1}}, // Description
+        {s:{r:0,c:2},e:{r:0,c:4}}, // TIER 1
+        {s:{r:0,c:5},e:{r:0,c:7}}, // TIER 2
+        {s:{r:0,c:8},e:{r:0,c:10}}, // TIER 3
+        {s:{r:0,c:11},e:{r:0,c:12}}, // Alum/EV
+      ];
+
+      ws['!cols']=[{wch:18},{wch:30},{wch:5},{wch:5},{wch:5},{wch:5},{wch:5},{wch:5},{wch:5},{wch:5},{wch:5},{wch:6},{wch:6}];
+      ws['!rows']=[{hpt:18},{hpt:16}];
+
+      XLSX.utils.book_append_sheet(wb,ws,'Tiered Restrictions');
+      XLSX.writeFile(wb,'MattA_PromoRestrictions_'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'.xlsx',{cellStyles:true});
+      btn.textContent='✓ Exported!';
+      setTimeout(()=>{btn.disabled=false;btn.textContent='⬇ Matt A\'s Export';},2500);
+    }catch(e){btn.disabled=false;btn.textContent='⬇ Matt A\'s Export';alert('Export error: '+e.message);}
+  },50);
 }
 function doExport(){
   const btn=document.getElementById('exportBtn');
