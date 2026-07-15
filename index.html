@@ -7,6 +7,14 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;font-size:12px;background:#f0f0f0;height:100vh;display:flex;flex-direction:column;overflow:hidden;color:#1a1a1a}
+/* BRAND SWITCHER */
+#brandBar{display:flex;align-items:stretch;background:#0a0a0c;border-bottom:2px solid #222;flex-shrink:0;z-index:50;}
+.brand-tab{padding:9px 28px;cursor:pointer;font-size:13px;font-weight:700;color:#555;letter-spacing:.3px;border-bottom:3px solid transparent;margin-bottom:-2px;user-select:none;transition:color .15s;}
+.brand-tab:hover{color:#ccc;}
+.brand-tab.cs-active{color:#fff;border-bottom-color:#0a84ff;}
+.brand-tab.hs-active{color:#22c55e;border-bottom-color:#22c55e;}
+#csSection{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+#hsSection{display:none;flex-direction:column;flex:1;overflow:hidden;background:#111;}
 #loginScreen{position:fixed;inset:0;background:#1c1c1e;display:flex;align-items:center;justify-content:center;z-index:1000}
 .login-box{background:#fff;border-radius:14px;padding:40px 44px;width:360px;box-shadow:0 12px 48px rgba(0,0,0,.4);text-align:center}
 .login-logo{font-size:36px;margin-bottom:8px}
@@ -113,6 +121,11 @@ td.bl{border-left:2px solid #ddd}
 </head>
 <body>
 
+<div id="brandBar">
+  <div class="brand-tab cs-active" id="csBrandTab" onclick="switchBrand('cs')">🛡️ CarShield</div>
+  <div class="brand-tab" id="hsBrandTab" onclick="switchBrand('hs')">🏠 HomeSafe</div>
+</div>
+<div id="csSection">
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">🛡️</div>
@@ -546,5 +559,389 @@ document.getElementById('q1').addEventListener('input',()=>render('current'));
 document.getElementById('q2').addEventListener('input',()=>render('edit'));
 if(sessionStorage.getItem(SESSION_KEY)==='1')render('current');
 </script>
-</body>
-</html>
+
+</div><!-- end csSection -->
+
+<div id="hsSection">
+<style>
+#hsSection { display:flex; flex-direction:column; flex:1; overflow:hidden; background:#f0f0f0; font-family:system-ui,sans-serif; font-size:12px; color:#1a1a1a; }
+#hsSection .hs-topbar { background:#1c1c1e; display:flex; align-items:stretch; border-bottom:2px solid #22c55e; flex-shrink:0; }
+#hsSection .hs-tab { padding:8px 18px; cursor:pointer; color:#888; font-size:13px; font-weight:600; border-bottom:2px solid transparent; margin-bottom:-2px; user-select:none; }
+#hsSection .hs-tab:hover { color:#ddd; }
+#hsSection .hs-tab.active { color:#fff; border-bottom-color:#22c55e; }
+#hsSection .hs-tab-spacer { flex:1; }
+#hsSection .hs-btn { margin:6px 6px 6px 0; padding:5px 14px; color:#fff; border:none; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; }
+#hsSection .hs-btn-matt { background:#7c3aed; }
+#hsSection .hs-btn-export { background:#30d158; }
+#hsSection .hs-btn-upload { background:#0a84ff; }
+#hsSection .hs-btn:hover { opacity:.85; }
+#hsSection .hs-toolbar { background:#2c2c2e; padding:6px 12px; display:flex; align-items:center; gap:8px; flex-shrink:0; border-bottom:1px solid #444; }
+#hsSection .hs-search { padding:5px 9px; border:none; border-radius:5px; font-size:12px; width:220px; background:#3a3a3c; color:#fff; outline:none; }
+#hsSection .hs-search::placeholder { color:#888; }
+#hsSection .hs-fb { padding:4px 10px; border:1px solid #555; border-radius:5px; background:transparent; color:#aaa; cursor:pointer; font-size:11px; }
+#hsSection .hs-fb.on { background:#0a84ff; border-color:#0a84ff; color:#fff; }
+#hsSection .hs-cnt { font-size:11px; color:#999; }
+#hsSection .hs-legbar { background:#252527; padding:4px 14px; display:flex; gap:10px; align-items:center; font-size:10px; color:#aaa; flex-shrink:0; border-bottom:1px solid #333; }
+#hsSection .hs-ld { width:16px; height:13px; border-radius:2px; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; }
+#hsSection .hs-tbl-wrap { overflow-y:auto; flex:1; background:#fff; }
+#hsSection table { width:100%; border-collapse:collapse; table-layout:fixed; }
+#hsSection col.c-promo { width:150px; }
+#hsSection col.c-desc { width:auto; }
+#hsSection col.c-rate { width:32px; }
+#hsSection thead { position:sticky; top:0; z-index:10; }
+#hsSection thead tr.tier-row th { padding:3px 4px; text-align:center; font-size:9px; font-weight:800; letter-spacing:.5px; border:1px solid #e0e0e0; }
+#hsSection th.h-blank { background:#fff; color:#555; text-align:left; padding-left:7px; font-size:10px; font-weight:600; }
+#hsSection th.h-t1 { background:#1a3550; color:#90caf9; }
+#hsSection th.h-t2 { background:#1a3a1a; color:#a5d6a7; }
+#hsSection th.h-t3 { background:#3a2012; color:#ffcc80; }
+#hsSection thead tr.col-row th { padding:4px 2px; text-align:center; font-size:10px; font-weight:700; border:1px solid #e0e0e0; }
+#hsSection th.hc-blank { background:#f8f8f8; color:#888; text-align:left; padding-left:6px; font-weight:400; font-size:10px; }
+#hsSection th.hc-a1 { background:#1d3d5a; color:#90caf9; }
+#hsSection th.hc-b1 { background:#1d3d5a; color:#a5d6a7; }
+#hsSection th.hc-a2 { background:#1a3a1a; color:#90caf9; border-left:2px solid #bbb; }
+#hsSection th.hc-b2 { background:#1a3a1a; color:#a5d6a7; }
+#hsSection th.hc-a3 { background:#3a2012; color:#90caf9; border-left:2px solid #bbb; }
+#hsSection th.hc-b3 { background:#3a2012; color:#a5d6a7; }
+#hsSection tbody tr { border-bottom:1px solid #ebebeb; }
+#hsSection tbody tr:hover { background:#f5f5f5 !important; }
+#hsSection tbody tr:nth-child(even) td.td-p, #hsSection tbody tr:nth-child(even) td.td-d { background:#fafafa; }
+#hsSection td { padding:3px 1px; text-align:center; vertical-align:middle; font-size:11px; font-weight:600; background:#fff; border:none; }
+#hsSection td.td-p { text-align:left; padding:3px 7px; font-weight:700; font-size:11px; background:#fff; color:#1a1a1a; word-break:break-all; }
+#hsSection td.td-d { text-align:left; padding:3px 5px; font-size:10px; color:#666; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:#fff; font-weight:400; }
+#hsSection td.bl { border-left:2px solid #ddd; }
+#hsSection .av-A { background:#e3f2fd; color:#1565c0; }
+#hsSection .av-B { background:#e8f5e9; color:#2e7d32; }
+#hsSection .av-X { background:#fce8e6; color:#c62828; }
+#hsSection .tog { cursor:pointer; border:none; border-radius:3px; font-weight:700; width:24px; height:20px; display:block; margin:auto; font-size:10px; }
+#hsSection .tog-A { background:#bbdefb; color:#0d47a1; }
+#hsSection .tog-B { background:#c8e6c9; color:#1b5e20; }
+#hsSection .tog-off { background:#f0f0f0; color:#bbb; text-decoration:line-through; }
+#hsSection .tog:hover { opacity:.75; }
+#hsSection .badge { display:inline-block; padding:1px 4px; border-radius:2px; font-size:8px; font-weight:700; margin-left:3px; vertical-align:middle; }
+#hsSection .by { background:#c8e6c9; color:#2e7d32; }
+#hsSection .bn { background:#eee; color:#999; }
+#hsSection .pane { display:none; flex-direction:column; flex:1; overflow:hidden; }
+#hsSection .pane.active { display:flex; }
+</style>
+
+<!-- TOP BAR -->
+<div class="hs-topbar">
+  <div class="hs-tab active" id="hs-tab-cur" onclick="hsShowTab('cur')">📋 Current</div>
+  <div class="hs-tab" id="hs-tab-edit" onclick="hsShowTab('edit')">✏️ Edit</div>
+  <div class="hs-tab-spacer"></div>
+  <button class="hs-btn hs-btn-upload" onclick="document.getElementById('hs-file-input').click()">⬆ Upload New List</button>
+  <input type="file" id="hs-file-input" accept=".xls,.xlsx" style="display:none" onchange="hsUpload(this)">
+  <button class="hs-btn hs-btn-matt" onclick="hsMattExport()">⬇ Matt A's Export</button>
+  <button class="hs-btn hs-btn-export" onclick="hsExport()">⬇ Export to Excel</button>
+</div>
+
+<!-- CURRENT PANE -->
+<div class="pane active" id="hs-pane-cur">
+  <div class="hs-toolbar">
+    <input type="text" class="hs-search" id="hs-q1" placeholder="Search promo or description…" oninput="hsRender('cur')">
+    <button class="hs-fb on" id="hs-b1All"    onclick="hsSetF('cur','all')">All</button>
+    <button class="hs-fb"    id="hs-b1Active" onclick="hsSetF('cur','active')">Active</button>
+    <button class="hs-fb"    id="hs-b1Inactive" onclick="hsSetF('cur','inactive')">Inactive</button>
+    <span class="hs-cnt" id="hs-cnt1"></span>
+  </div>
+  <div class="hs-legbar">
+    <strong style="color:#ccc;margin-right:2px">Tiered:</strong>
+    <span style="display:flex;align-items:center;gap:3px"><span class="hs-ld av-A">A</span>A rate</span>
+    <span style="display:flex;align-items:center;gap:3px"><span class="hs-ld av-B">B</span>B rate</span>
+    <span style="display:flex;align-items:center;gap:3px"><span class="hs-ld av-X">—</span>Blocked</span>
+  </div>
+  <div class="hs-tbl-wrap"><table><colgroup>
+    <col class="c-promo"><col class="c-desc">
+    <col class="c-rate"><col class="c-rate">
+    <col class="c-rate"><col class="c-rate">
+    <col class="c-rate"><col class="c-rate">
+  </colgroup><thead>
+    <tr class="tier-row">
+      <th class="h-blank" rowspan="2">Promo</th>
+      <th class="h-blank hc-blank" rowspan="2">Description</th>
+      <th class="h-t1" colspan="2">TIER 1</th>
+      <th class="h-t2" colspan="2">TIER 2</th>
+      <th class="h-t3" colspan="2">TIER 3</th>
+    </tr>
+    <tr class="col-row">
+      <th class="hc-a1">A</th><th class="hc-b1">B</th>
+      <th class="hc-a2">A</th><th class="hc-b2">B</th>
+      <th class="hc-a3">A</th><th class="hc-b3">B</th>
+    </tr>
+  </thead><tbody id="hs-tbody1"></tbody></table></div>
+</div>
+
+<!-- EDIT PANE -->
+<div class="pane" id="hs-pane-edit">
+  <div class="hs-toolbar">
+    <input type="text" class="hs-search" id="hs-q2" placeholder="Search promo or description…" oninput="hsRender('edit')">
+    <button class="hs-fb on" id="hs-b2All"    onclick="hsSetF('edit','all')">All</button>
+    <button class="hs-fb"    id="hs-b2Active" onclick="hsSetF('edit','active')">Active</button>
+    <button class="hs-fb"    id="hs-b2Inactive" onclick="hsSetF('edit','inactive')">Inactive</button>
+    <span class="hs-cnt" id="hs-cnt2"></span>
+    <button style="margin-left:auto;padding:4px 12px;border:1px solid #ff453a;border-radius:5px;background:transparent;color:#ff453a;cursor:pointer;font-size:11px" onclick="hsResetAll()">↩ Reset all</button>
+  </div>
+  <div class="hs-legbar">
+    <strong style="color:#ccc;margin-right:2px">Click to toggle:</strong>
+    <span style="display:flex;align-items:center;gap:3px"><span class="hs-ld av-A">A</span>Tiered A</span>
+    <span style="display:flex;align-items:center;gap:3px"><span class="hs-ld av-B">B</span>Tiered B</span>
+    <span style="display:flex;align-items:center;gap:3px"><span class="hs-ld av-X">—</span>Blocked</span>
+    <span style="color:#ff9f0a;margin-left:10px;font-size:10px">● Orange = modified</span>
+  </div>
+  <div class="hs-tbl-wrap"><table><colgroup>
+    <col class="c-promo"><col class="c-desc">
+    <col class="c-rate"><col class="c-rate">
+    <col class="c-rate"><col class="c-rate">
+    <col class="c-rate"><col class="c-rate">
+  </colgroup><thead>
+    <tr class="tier-row">
+      <th class="h-blank" rowspan="2">Promo</th>
+      <th class="h-blank hc-blank" rowspan="2">Description</th>
+      <th class="h-t1" colspan="2">TIER 1</th>
+      <th class="h-t2" colspan="2">TIER 2</th>
+      <th class="h-t3" colspan="2">TIER 3</th>
+    </tr>
+    <tr class="col-row">
+      <th class="hc-a1">A</th><th class="hc-b1">B</th>
+      <th class="hc-a2">A</th><th class="hc-b2">B</th>
+      <th class="hc-a3">A</th><th class="hc-b3">B</th>
+    </tr>
+  </thead><tbody id="hs-tbody2"></tbody></table></div>
+</div>
+
+<script>
+// ── HomeSafe Data ─────────────────────────────────────────
+const PROMO_DATA = [{"p": "333MHP", "d": "333MHP MYHOME", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "901-HS", "d": "HOMESAFE BANNER", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "997-HS", "d": "CARSHIELD EMAIL CONFIRMATION B", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "997-HS-A", "d": "CARSHIELD EMAIL CONFIRMATION B", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "999-CSHS", "d": "HOMESAFE BANNER ON CARSHIELD", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "999-HOME", "d": "999-HOME GEN WEB CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "999-HS", "d": "HOMESAFE.COM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "999-HS-A", "d": "HOMESAFE.COM CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "AASEMP", "d": "AASEMP", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "ACTIVESALES", "d": "CSH ACTIVE SALES", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CANCELS", "d": "CANCELS", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CARCHEXACTIVE", "d": "CARCHEX ACTIVE SALES", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CARSHIELD25", "d": "CARSHIELD REFFERAL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CCBEMAIL", "d": "CANCEL EMAIL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CSACTIVE", "d": "CSH ACTIVE SALES", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CSAHS997", "d": "CARSHIELD ACTIVE HOMESAFE PROM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CSAHS998", "d": "CARSHIELD ACTIVE HOMESAFE PROM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CSAHS999", "d": "CARSHIELD ACTIVE HOMESAFE PROM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CSCANCEL", "d": "CSH CANCEL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CSD001", "d": "CSD PITCHED", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CSHOME", "d": "CS HOMESAFE PROMOCODE", "r": ":H1A:H2A:H3A:", "a": ""}, {"p": "CSHS996", "d": "CARSHIELD FULFILLMENT", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CSNPHS999", "d": "CARSHIELD NO PITCH HOMESAFE PR", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CSPHS999", "d": "CARSHIELD PITCH HOMESAFE PROMO", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CSPITCHED", "d": "CSH PITCHED", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CSSPACTIVE", "d": "CARSHIELD ACTIVE SP SALES", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CUST REF", "d": "CUST REF", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CXACTIVE", "d": "CX ACTIVE SALES", "r": ":H1A:H2A:H3A:", "a": ""}, {"p": "CXCANCEL", "d": "CX CANCEL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CXLCB", "d": "CANCEL CB", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "CXPITCHED", "d": "CX PITCHED", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "DISPO", "d": "DISPO FOR OUTBOUND", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "EMAIL", "d": "EMAIL CAMPAIGN", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "EMP", "d": "EMP", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME797-A", "d": "VOICE INTERNET FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME797-AC", "d": "VOICE CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME798-A", "d": "NATIONAL NON-BRAND SEARCH", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME798-AC", "d": "NATIONAL NON-BRAND SEARCH C", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME799", "d": "UNUSED", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME799-A", "d": "NATIONAL BRAND SEARCH", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME799-AC", "d": "NATIONAL BRAND SEARCH CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME800-AAA", "d": "23083551970 FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME800-AAAA", "d": "23083551970 CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME800-AAB", "d": "23079476294", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME800-AABB", "d": "23079476294 CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME880-A", "d": "CX3 - FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME880-AC", "d": "CX3 - CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME881-A", "d": "IGNITE - FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME881-AC", "d": "IGNITE - CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME882-A", "d": "3 WEST MEDIA - FORM CPL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME882-AC", "d": "3 WEST MEDIA - CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME882-B", "d": "3 WEST MEDIA - FORM - CPM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME882-BC", "d": "3 WEST MEDIA - CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME883-A", "d": "SPOTTOWER 1 - FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME883-AC", "d": "SPOTTOWER 1 - CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME883-B", "d": "SPOTTOWER 2 - FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME883-BC", "d": "SPOTTOWER 2 - CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME884-A", "d": "TOP10 - FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME884-AC", "d": "TOP10 - CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME885-A", "d": "NATURAL INTEL CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME886-AAA", "d": "HOMESAFE EMAIL-MAILER REF", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME886-AAB", "d": "HOMESAFE EMAIL-MAILER NO REF", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME887-A", "d": "MONEY GROUP FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME887-AC", "d": "MONEY GROUP CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME887-B", "d": "MONEY GROUP T1 FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME887-BC", "d": "MONEY GROUP T1 CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME887-C", "d": "HOME887-C MONEY SOCIAL F", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME887-CC", "d": "HOME887-CC MONEY SOCIAL CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME888-A", "d": "FORBES FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME888-AC", "d": "FORBES CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME889-A", "d": "HOME889-A HOMESAFE YT FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME889-AC", "d": "HOME889-AC HOMESAFE YT CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME889-B", "d": "HOME889-B DREW BREES - YT F", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME889-BC", "d": "HOME889-BC DREW BRESS - YT C", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME890-A", "d": "HOME890-A IMP SHARE NATIONAL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME890-AC", "d": "HOME890-AC IMPT SHARE NAT CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME890-B", "d": "HOME890-B  HOME SEARCH NAT FOR", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME890-BC", "d": "HOME890-BC HOME SEARCH NAT CAL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME893-A", "d": "HOME893-A PMAX FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME893-AC", "d": "HOME893-AC PMAX CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME894-A", "d": "HOME894-A APPLIANCES FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME894-AC", "d": "HOME894-AC APPLIANCES CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME895-A", "d": "HOME895-A ELECTRICAL FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME895-AC", "d": "HOME895-AC ELECTRICAL CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME896-A", "d": "HOME896-A PLUMBING FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME896-AC", "d": "HOME896-AC PLUMBING CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME897-A", "d": "HOME897-A HVAC FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME897-AC", "d": "HOME897-AC HVAC CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME898-A", "d": "HOME898-A GEN NON-BRAND FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME898-AC", "d": "HOME898-AC GEN NON-BRAND CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME899-A", "d": "HOME899-A BRAND FORM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME899-AC", "d": "HOME899-AC BRAND CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME900-A", "d": "HOME900-A CA MULTIMATCH T3", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME900-AC", "d": "HOME900-AC CA MULTIMATCH T3 CL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME900-B", "d": "HOME900-B CA MULTIMATCH T2 F", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME900-BC", "d": "HOME900-BC CA MULTIMTCH T2 CAL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME900-C", "d": "HOME900-C CA MULTIMATCH T1 F", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME900-CC", "d": "HOME900-CC CA MULTIMATCH T1 CL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME900-D", "d": "HOME900-D CA BRANDED F", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME900-DC", "d": "HOME900-DC CA BRANDED CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME900-E", "d": "HOME900-E INBOUND F", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME900-EC", "d": "HOME900-EC INBOUND CAL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME900-F", "d": "HOME900-F CA MULTIMATCH T4 F", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME900-FC", "d": "HOME900-FC CA MULTIMATCH T4 C", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME900-G", "d": "HOME900-G CA MULTIMATCH T5 F", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME900-GC", "d": "HOME900-GC CA MULTIMATCH T5 C", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME997", "d": "HOME997 - HDYH TV", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOME999", "d": "HOME999 - GEN WEB", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOMETV", "d": "HOMETV - TV PROMO", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HOST", "d": "HOST  DISCOUNT!", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HS-FB", "d": "HS-FB FACEBOOK", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HS-IG", "d": "HS-IG INSTAGRAM", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HS-LINK", "d": "HS-LINKEDIN", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HS-TT", "d": "HS-TIKTOK", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HS-TW", "d": "HS-TWITTER", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HS-YT", "d": "HS-YT", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HS0001", "d": "HS0001", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HS0002", "d": "HS0002 - CA LEAD", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HS0002-A", "d": "HS0002-A - CA CALL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HS0003-A", "d": "INFORMED DELIVERY HOMESAFE", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HSBOOK", "d": "HSBOOK", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HSCANCEL", "d": "HS CCBS", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HSPITCH994", "d": "HOMESAFE PITCH EMAIL 6", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HSPITCH995", "d": "HOMESAFE PITCH EMAIL 5", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HSPITCH996", "d": "HOMESAFE PITCH EMAIL 4", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HSPITCH997", "d": "HOMESAFE PITCH EMAIL 3", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HSPITCH998", "d": "HOMESAFE PITCH EMAIL 2", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HSPITCH999", "d": "HOMESAFE PITCH EMAIL 1", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HSPITCHED", "d": "HS PITCHED", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HSTV", "d": "HOMESAFE TV", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "HSXOFF999", "d": "HS TO CS EXCLUSIVE OFFER", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "INT", "d": "INTERNET", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "INTERNET", "d": "INTERNET LEAD", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "LARACTIVE", "d": "LARIAT ACTIVESALES", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "MAIL", "d": "MAIL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "MAIL-DISCOUNT", "d": "MAIL-DISCOUNT", "r": ":H1A:H2A:H3A:", "a": ""}, {"p": "MHR", "d": "MY HOME RENEWALS", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "MYCANCELS", "d": "MYCANCELS", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "PITCHED", "d": "HS PITCHED", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "REALTOR", "d": "REALTOR", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "RNEMAIL", "d": "RENEWAL EMAIL", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "TESTLEAD", "d": "TESTLEAD", "r": ":H1B:H2B:H3B:", "a": ""}, {"p": "TRAINING", "d": "TRAINING OUTBOUND", "r": ":H1B:H2B:H3B:", "a": "y"}, {"p": "WEB", "d": "WEB LEAD", "r": ":H1A:H2A:H3A:", "a": ""}, {"p": "WEB CALL", "d": "WEB CALL", "r": ":H1A:H2A:H3A:", "a": ""}];
+
+// ── State ─────────────────────────────────────────────────
+// Admin codes: H1A/H1B = Tier1 A/B, H2A/H2B = Tier2 A/B, H3A/H3B = Tier3 A/B
+// Restricted string ":H1B:H2B:H3B:" means those codes are BLOCKED
+const HS_ADMINS = ['H1A','H1B','H2A','H2B','H3A','H3B'];
+const HS_COLS = [
+  ['H1A','A','av-A','tog-A',false], ['H1B','B','av-B','tog-B',false],
+  ['H2A','A','av-A','tog-A',true],  ['H2B','B','av-B','tog-B',false],
+  ['H3A','A','av-A','tog-A',true],  ['H3B','B','av-B','tog-B',false],
+];
+
+let hs_DATA   = PROMO_DATA.filter(r => r.p && r.p !== '145');
+let hs_EDITS  = {};   // {promo: {adminCode: bool}}  true=available
+let hs_SNAP   = {};   // snapshots of original availability
+let hs_filt   = {cur:'all', edit:'all'};
+let hs_tab    = 'cur';
+
+// Build snapshot
+function hsBuildSnap() {
+  hs_SNAP = {};
+  hs_DATA.forEach(rec => {
+    hs_SNAP[rec.p] = {};
+    HS_ADMINS.forEach(a => { hs_SNAP[rec.p][a] = !rec.r.includes(':'+a+':'); });
+  });
+}
+hsBuildSnap();
+
+// Get availability for a record (respects edits)
+function hsAv(rec) {
+  const av = {};
+  HS_ADMINS.forEach(a => {
+    if (hs_EDITS[rec.p] && hs_EDITS[rec.p][a] !== undefined) {
+      av[a] = hs_EDITS[rec.p][a];
+    } else {
+      av[a] = !rec.r.includes(':'+a+':');
+    }
+  });
+  return av;
+}
+
+// Check if changed from snapshot
+function hsChanged(rec) {
+  if (!hs_SNAP[rec.p]) return false;
+  const av = hsAv(rec);
+  return HS_ADMINS.some(a => av[a] !== hs_SNAP[rec.p][a]);
+}
+
+// Filter data
+function hsFiltered(pane) {
+  const q = (document.getElementById('hs-q'+pane.replace('cur','1').replace('edit','2'))||{value:''}).value.trim().toLowerCase();
+  const f = hs_filt[pane];
+  return hs_DATA.filter(rec => {
+    if (f==='active' && rec.a!=='y') return false;
+    if (f==='inactive' && rec.a==='y') return false;
+    if (q && !rec.p.toLowerCase().includes(q) && !rec.d.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+// Set filter
+function hsSetF(pane, mode) {
+  hs_filt[pane] = mode;
+  ['All','Active','Inactive'].forEach(m => {
+    const el = document.getElementById('hs-b'+(pane==='cur'?'1':'2')+m);
+    if(el) el.className = 'hs-fb' + (mode===m.toLowerCase()?' on':'');
+  });
+  hsRender(pane);
+}
+
+// Main render
+function hsRender(pane) {
+  const rows = hsFiltered(pane);
+  const cntEl = document.getElementById('hs-cnt'+(pane==='cur'?'1':'2'));
+  if (cntEl) cntEl.textContent = rows.length + ' promos';
+  const tbody = document.getElementById('hs-tbody'+(pane==='cur'?'1':'2'));
+  if (!tbody) return;
+  const isEdit = (pane==='edit');
+
+  tbody.innerHTML = rows.map(rec => {
+    const av = hsAv(rec);
+    const changed = hsChanged(rec);
+    const badge = rec.a==='y'
+      ? '<span class="badge by">ACT</span>'
+      : '<span class="badge bn">OFF</span>';
+    const dot = changed ? ' <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#ff9f0a;vertical-align:middle"></span>' : '';
+    
+    const cells = HS_COLS.map(([code, lbl, avCls, togCls, bl]) => {
+      const on = av[code];
+      if (isEdit) {
+        return `<td class="${bl?'bl':''}"><button class="tog ${on?togCls:'tog-off'}" onclick="hsTog('${rec.p}','${code}',this)">${on?lbl:'—'}</button></td>`;
+      } else {
+        return `<td class="${bl?'bl':''} ${on?avCls:'av-X'}">${on?lbl:'—'}</td>`;
+      }
+    }).join('');
+
+    return `<tr class="${changed?'changed':''}"><td class="td-p">${rec.p}${badge}${dot}</td><td class="td-d" title="${rec.d}">${rec.d}</td>${cells}</tr>`;
+  }).join('');
+}
+
+// Toggle cell in edit mode
+function hsTog(promo, code, btn) {
+  if (!hs_EDITS[promo]) hs_EDITS[promo] = {};
+  const rec = hs_DATA.find(r => r.p===promo);
+  const curOn = hsAv(rec)[code];
+  hs_EDITS[promo][code] = !curOn;
+  const nowOn = !curOn;
+  const col = HS_COLS.find(([c]) => c===code);
+  btn.className = 'tog ' + (nowOn ? col[3] : 'tog-off');
+  btn.textContent = nowOn ? col[1] : '—';
+  // update changed indicator on row
+  const tr = btn.closest('tr');
+  if (tr) tr.className = hsChanged(rec) ? 'changed' : '';
+  // update change badge
+  const badge = document.getElementById('hs-change-badge');
+  if (badge) {
+    const n = Object.keys(hs_EDITS).filter(p => {
+      const r2 = hs_DATA.find(x=>x.p===p);
+      return r2 && hsChanged(r2);
+    }).length;
+    badge.textContent = n + ' changed';
+    badge.style.display = n ? 'inline-block' : 'none';
+  }
+}
+
+// Reset all edits
+function hsResetAll() {
+  if (!confirm('Reset all changes?')) return;
+  hs_EDITS = {};
+  hsRender('edit');
+}
+
+// Tab switch
+function hsShowTab(tab) {
+  hs_tab = tab;
+  ['cur','edit'].forEach(t => {
+    document.getElementById('hs-pane-'+t).className = 'pane' + (t===tab?' active':'');
+    document.getElementById('hs-tab-'+t).className = 'hs-tab' + (t===tab?' active':'');
+  });
+  hsRender(tab);
+}
+
+// Upload
+function hsUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+      let hdrIdx = rows.findIndex(r => r.includes('Promo') || r.includes('Restricted'));
+      if (hdrIdx<0) hdrIdx=4;
+      const hdrs = rows[hdrIdx];
+      const pI=hdrs.indexOf('Promo'), dI=hdrs.indexOf('Desc'), rI=hdrs.indexOf('Restricted'), aI=hdrs.indexOf('Active?');
+      const newData = [];
+      for (let i=hdrIdx+1;i<rows.length;i++) {
+        const r=rows[i], p=String(r[pI]||'').trim();
+        if (!p||p==='145') continue;
+        newData.push({p, d:String(r[dI]||'').trim(), r:String(r[rI]||'').trim(), a:String(r[aI]||'').trim().toLowerCase()});
+      }
+      if (!newData.length){alert('No data found');return;}
+      hs_DATA=newData; hs_EDITS={}; hsBuildSnap();
+      hsRender(hs_tab);
+      alert('Loaded '+hs_DATA.length+' promos from '+file.name);
+    } catch(e){alert('Error: '+e.message);}
+  };
+  reader.readAsArrayBuffer(file);
+  input.value='';
+}
+
+// Export to Excel
+function hsExport() {
+  const btn = document.querySelector('#hsSection .hs-btn-export');
+  if(btn){btn.disabled=true; btn.textContent='⏳...';}
+  setTimeout(()=>{
+    try{
+      const aoa=[['Promo','Description','H1A','H1B','H2A','H2B','H3A','H3B','Active','Changed?']];
+      hs_DATA.forEach(rec=>{
+        const av=hsAv(rec);
+        const changed=hsChanged(rec);
+        aoa.push([rec.p,rec.d,av.H1A?'A':'—',av.H1B?'B':'—',av.H2A?'A':'—',av.H2B?'B':'—',av.H3A?'A':'—',av.H3B?'B':'—',rec.a==='y'?'Active':'Inactive',changed?'YES':'']);
+      });
+      const wb=XLSX.utils.book_new();
+      const ws=XLSX.utils.aoa_to_sheet(aoa);
+      ws['!cols']=[{wch:20},{wch:35},{wch:6},{wch:6},{wch:6},{wch:6},{wch:6},{wch:6},{wch:10},{wch:10}];
+      XLSX.utils.book_append_sheet(wb,ws,'HomeSafe Promos');
+      XLSX.writeFile(wb,'HomeSafe_Export_'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'.xlsx');
+      if(btn){btn.disabled=false; btn.textContent='⬇ Export to Excel';}
+    }catch(e){if(btn){btn.disabled=false; btn.textContent='⬇ Export to Excel';} alert('Error: '+e.message);}
+  },50);
+}
+
+// Matt A Export
+function hsMattExport() {
+  const btn = document.querySelector('#hsSection .hs-btn-matt');
+  if(btn){btn.disabled=true; btn.textContent='⏳...';}
+  setTimeout(()=>{
+    try{
+      const aoa=[['Promo','Description','Tier1-A','Tier1-B','Tier2-A','Tier2-B','Tier3-A','Tier3-B']];
+      hs_DATA.forEach(rec=>{
+        const av=hsAv(rec);
+        aoa.push([rec.p,rec.d,av.H1A?'A':'—',av.H1B?'B':'—',av.H2A?'A':'—',av.H2B?'B':'—',av.H3A?'A':'—',av.H3B?'B':'—']);
+      });
+      const wb=XLSX.utils.book_new();
+      const ws=XLSX.utils.aoa_to_sheet(aoa);
+      ws['!cols']=[{wch:20},{wch:35},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10}];
+      XLSX.utils.book_append_sheet(wb,ws,'Tiered Restrictions');
+      XLSX.writeFile(wb,'HomeSafe_MattA_'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'.xlsx');
+      if(btn){btn.disabled=false; btn.textContent="⬇ Matt A's Export";}
+    }catch(e){if(btn){btn.disabled=false; btn.textContent="⬇ Matt A's Export";} alert('Error: '+e.message);}
+  },50);
+}
+</script>
+</div><!-- end hsSection -->
+
+<script>
+function switchBrand(b){
+  var cs=document.getElementById('csSection');
+  var hs=document.getElementById('hsSection');
+  var ct=document.getElementById('csBrandTab');
+  var ht=document.getElementById('hsBrandTab');
+  if(b==='cs'){
+    cs.style.display='flex'; hs.style.display='none';
+    ct.className='brand-tab cs-active'; ht.className='brand-tab';
+  }else{
+    cs.style.display='none'; hs.style.display='flex';
+    ht.className='brand-tab hs-active'; ct.className='brand-tab';
+    setTimeout(function(){ hsRender('cur'); }, 20);
+  }
+}
+</script>
+</body></html>
