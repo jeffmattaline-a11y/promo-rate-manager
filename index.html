@@ -941,21 +941,35 @@ function hsUpload(input) {
   input.value='';
 }
 
+// Build the colon-delimited Restricted string from current av state
+function hsBuildRestricted(rec) {
+  const av = hsAv(rec);
+  const blocked = HS_ADMINS.filter(a => !av[a]);
+  return blocked.length ? ':' + blocked.join(':') + ':' : '';
+}
+
 // Export to Excel
 function hsExport() {
   const btn = document.querySelector('#hsSection .hs-btn-export');
   if(btn){btn.disabled=true; btn.textContent='⏳...';}
   setTimeout(()=>{
     try{
-      const aoa=[['Promo','Description','H1A','H1B','H2A','H2B','H3A','H3B','Active','Changed?']];
+      const aoa=[['Promo','Desc','Restricted','Active?','Changed?','H1A','H1B','H2A','H2B','H3A','H3B']];
       hs_DATA.forEach(rec=>{
         const av=hsAv(rec);
         const changed=hsChanged(rec);
-        aoa.push([rec.p,rec.d,av.H1A?'A':'—',av.H1B?'B':'—',av.H2A?'A':'—',av.H2B?'B':'—',av.H3A?'A':'—',av.H3B?'B':'—',rec.a==='y'?'Active':'Inactive',changed?'YES':'']);
+        const restricted=hsBuildRestricted(rec);
+        aoa.push([
+          rec.p, rec.d, restricted, rec.a,
+          changed?'YES':'',
+          av.H1A?'A':'—', av.H1B?'B':'—',
+          av.H2A?'A':'—', av.H2B?'B':'—',
+          av.H3A?'A':'—', av.H3B?'B':'—'
+        ]);
       });
       const wb=XLSX.utils.book_new();
       const ws=XLSX.utils.aoa_to_sheet(aoa);
-      ws['!cols']=[{wch:20},{wch:35},{wch:6},{wch:6},{wch:6},{wch:6},{wch:6},{wch:6},{wch:10},{wch:10}];
+      ws['!cols']=[{wch:20},{wch:35},{wch:30},{wch:8},{wch:10},{wch:6},{wch:6},{wch:6},{wch:6},{wch:6},{wch:6}];
       XLSX.utils.book_append_sheet(wb,ws,'HomeSafe Promos');
       XLSX.writeFile(wb,'HomeSafe_Export_'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'.xlsx');
       if(btn){btn.disabled=false; btn.textContent='⬇ Export to Excel';}
