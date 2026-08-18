@@ -444,8 +444,10 @@ function handleFileSelect(file){
         const rClean=String(rRaw).split(':').filter(x=>x&&x.toLowerCase()!=='n/a').join(':');
         const rset=new Set(rClean?rClean.split(':'):[]);
         const av=computeAv(rset);
-        // passthrough = everything not in our display groups (Florida + M2MD + specialty)
-        const pt=[...rset].filter(c=>![...Object.values(ALL_CODES).flat()].includes(c)).sort();
+        // passthrough = everything not in our display groups, EXCLUDING Florida —
+        // Florida codes must stay in pt so getFlBits() can see them (see comment above getFlBits).
+        const NON_FL_CODES=Object.entries(ALL_CODES).filter(([k])=>!k.startsWith('fl')).flatMap(([,v])=>v);
+        const pt=[...rset].filter(c=>!NON_FL_CODES.includes(c)).sort();
         const get=col=>{const idx=ci[col];if(idx===undefined)return null;const v=row[idx];
           if(v===null||v===undefined||v==='')return null;
           if(typeof v==='number'&&Number.isInteger(v))return v;return String(v);};
